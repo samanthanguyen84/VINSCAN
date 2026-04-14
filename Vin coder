@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VINSCAN — Parts Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0a; --surf:#111; --border:#252525;
+  --accent:#d4ff00; --red:#ff4d00; --text:#f0f0f0;
+  --muted:#555; --green:#00e5a0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,255,0,.03)1px,transparent 1px),linear-gradient(90deg,rgba(212,255,0,.03)1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{max-width:940px;margin:0 auto;padding:36px 18px 60px;position:relative;z-index:1;}
+
+/* header */
+.logo-dot{width:32px;height:32px;background:var(–accent);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:4px;}
+.logo-dot svg{width:18px;height:18px;}
+h1{font-family:‘Bebas Neue’,sans-serif;font-size:clamp(44px,9vw,76px);letter-spacing:2px;line-height:1;}
+h1 em{color:var(–accent);font-style:normal;}
+.sub{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–muted);letter-spacing:2px;text-transform:uppercase;margin-top:6px;}
+
+/* cards */
+.card{background:var(–surf);border:1px solid var(–border);border-radius:12px;padding:28px;margin-bottom:20px;}
+.lbl{font-family:‘DM Mono’,monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(–accent);margin-bottom:14px;}
+
+/* VIN input */
+.vin-shell{position:relative;overflow:hidden;}
+.vin-shell::after{content:‘VIN’;position:absolute;right:20px;top:50%;transform:translateY(-50%);font-family:‘Bebas Neue’,sans-serif;font-size:100px;color:rgba(212,255,0,.04);pointer-events:none;line-height:1;}
+.row{display:flex;gap:10px;}
+.vin-input{flex:1;background:var(–bg);border:1px solid var(–border);border-radius:8px;padding:15px 18px;font-family:‘DM Mono’,monospace;font-size:17px;letter-spacing:4px;color:var(–text);text-transform:uppercase;outline:none;transition:border-color .2s;}
+.vin-input::placeholder{color:var(–muted);font-size:13px;letter-spacing:2px;}
+.vin-input:focus{border-color:var(–accent);}
+.btn{border:none;border-radius:8px;font-family:‘Bebas Neue’,sans-serif;cursor:pointer;transition:all .15s;letter-spacing:1.5px;}
+.btn-y{background:var(–accent);color:#000;padding:15px 26px;font-size:17px;}
+.btn-y:hover{background:#fff;}
+.btn-y:disabled{background:var(–border);color:var(–muted);cursor:not-allowed;}
+.btn-ghost{background:transparent;border:1px solid var(–accent);color:var(–accent);padding:13px 20px;font-size:15px;}
+.btn-ghost:hover{background:var(–accent);color:#000;}
+.btn-red{background:var(–red);color:#fff;width:100%;padding:17px;font-size:19px;letter-spacing:3px;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:18px;}
+.btn-red:hover{background:#ff6a2f;transform:translateY(-1px);}
+.btn-red:disabled{background:var(–border);color:var(–muted);cursor:not-allowed;transform:none;}
+.btn-restart{background:transparent;border:1px solid #333;color:var(–muted);padding:10px 18px;font-size:13px;border-radius:8px;display:flex;align-items:center;gap:7px;margin-left:auto;}
+.btn-restart:hover{border-color:var(–red);color:var(–red);}
+
+.hint{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–muted);margin-top:9px;}
+.hint a{color:var(–accent);cursor:pointer;text-decoration:underline;}
+.err{display:none;margin-top:10px;padding:11px 15px;background:rgba(255,77,0,.12);border:1px solid var(–red);border-radius:8px;font-family:‘DM Mono’,monospace;font-size:12px;color:var(–red);}
+.err.show{display:block;}
+
+/* vehicle info */
+.v-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap;}
+.v-title{font-family:‘Bebas Neue’,sans-serif;font-size:34px;letter-spacing:1px;line-height:1;}
+.v-sub{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–muted);margin-top:3px;}
+.badge{background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.35);color:var(–green);font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:2px;padding:5px 11px;border-radius:20px;white-space:nowrap;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;}
+.cell{background:var(–bg);border:1px solid var(–border);border-radius:8px;padding:13px 15px;}
+.cell-l{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–muted);margin-bottom:5px;}
+.cell-v{font-size:13px;font-weight:500;}
+.cell-v.hl{color:var(–accent);}
+
+/* repair select */
+.sel-wrap{position:relative;flex:1;min-width:200px;}
+select{width:100%;background:var(–bg);border:1px solid var(–border);border-radius:8px;padding:13px 42px 13px 15px;font-family:‘DM Sans’,sans-serif;font-size:14px;color:var(–text);outline:none;appearance:none;cursor:pointer;}
+select:focus{border-color:var(–accent);}
+.arr{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(–muted);}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;min-height:32px;align-items:center;}
+.tag{background:rgba(212,255,0,.09);border:1px solid rgba(212,255,0,.28);color:var(–accent);border-radius:20px;padding:5px 13px 5px 11px;font-size:12px;font-family:‘DM Mono’,monospace;display:flex;align-items:center;gap:7px;animation:pop .18s ease;}
+@keyframes pop{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+.tx{cursor:pointer;opacity:.55;transition:opacity .15s;font-size:14px;line-height:1;}
+.tx:hover{opacity:1;}
+.no-tags{font-size:12px;color:var(–muted);font-family:‘DM Mono’,monospace;}
+
+/* parts */
+.p-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.p-count{background:var(–red);color:#fff;font-family:‘DM Mono’,monospace;font-size:11px;padding:4px 10px;border-radius:20px;}
+.grp{margin-bottom:26px;}
+.grp:last-child{margin-bottom:0;}
+.grp-title{font-family:‘Bebas Neue’,sans-serif;font-size:19px;letter-spacing:1px;color:var(–accent);border-bottom:1px solid var(–border);padding-bottom:9px;margin-bottom:12px;display:flex;align-items:center;gap:9px;}
+.grp-title::before{content:’’;width:7px;height:7px;background:var(–accent);border-radius:50%;display:inline-block;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–muted);padding:7px 11px;border-bottom:1px solid var(–border);}
+td{padding:11px;font-size:13px;border-bottom:1px solid rgba(37,37,37,.6);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(212,255,0,.02);}
+.pn{font-weight:500;}
+.pq{font-family:‘DM Mono’,monospace;font-size:12px;color:var(–accent);white-space:nowrap;}
+.pno{font-size:11px;color:var(–muted);font-style:italic;}
+.pri{display:inline-block;font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap;}
+.pr-critical{background:rgba(255,77,0,.18);color:var(–red);border:1px solid rgba(255,77,0,.3);}
+.pr-recommended{background:rgba(212,255,0,.09);color:var(–accent);border:1px solid rgba(212,255,0,.23);}
+.pr-optional{background:rgba(85,85,85,.15);color:var(–muted);border:1px solid var(–border);}
+
+.hidden{display:none!important;}
+.fadein{animation:slideIn .35s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+footer{text-align:center;padding-top:28px;font-family:‘DM Mono’,monospace;font-size:10px;color:var(–muted);letter-spacing:1px;}
+@media(max-width:580px){.row{flex-direction:column;}.grid{grid-template-columns:1fr 1fr;}th:nth-child(4),td:nth-child(4){display:none;}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+
+<header style="margin-bottom:40px;">
+  <div class="logo-dot">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+    </svg>
+  </div>
+  <h1>VIN<em>SCAN</em></h1>
+  <p class="sub">Vehicle Diagnostics &amp; Parts Finder</p>
+</header>
+
+<!-- Step 1 -->
+
+<div class="card vin-shell" id="s1">
+  <div class="lbl">Step 01 — Decode Your VIN</div>
+  <div class="row">
+    <input class="vin-input" id="vinInput" maxlength="17" placeholder="Enter 17-character VIN" autocomplete="off" spellcheck="false"/>
+    <button class="btn btn-y" id="decodeBtn" onclick="decodeVIN()">DECODE</button>
+  </div>
+  <p class="hint">Samples: 
+    <a onclick="ls('1HGBH41JXMN109186')">Honda Civic</a> · 
+    <a onclick="ls('1FTFW1ET5EFC78804')">Ford F-150</a> · 
+    <a onclick="ls('1G1YY22G7X5117779')">Chevy Corvette</a> · 
+    <a onclick="ls('JM1BK343X81154321')">Mazda RX-8</a>
+  </p>
+  <div class="err" id="errBox"></div>
+</div>
+
+<!-- Vehicle Info -->
+
+<div class="card fadein hidden" id="s2">
+  <div class="v-header">
+    <div>
+      <div class="v-title" id="vTitle">—</div>
+      <div class="v-sub" id="vSub">VIN: —</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="badge">✓ VIN DECODED</div>
+      <button class="btn btn-restart" onclick="restartApp()" title="Start over">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+        RESTART
+      </button>
+    </div>
+  </div>
+  <div class="grid" id="infoGrid"></div>
+</div>
+
+<!-- Repair Select -->
+
+<div class="card fadein hidden" id="s3">
+  <div class="lbl">Step 02 — Select Issues / Services</div>
+  <div class="row" style="flex-wrap:wrap;">
+    <div class="sel-wrap">
+      <select id="repSel">
+        <option value="">— Choose a repair or service —</option>
+        <optgroup label="🔧 Engine">
+          <option>Oil Change</option>
+          <option>Spark Plug Replacement</option>
+          <option>Timing Belt / Chain Replacement</option>
+          <option>Head Gasket Repair</option>
+          <option>Engine Air Filter Replacement</option>
+          <option>Coolant / Thermostat Service</option>
+          <option>PCV Valve Replacement</option>
+          <option>Valve Cover Gasket Replacement</option>
+          <option>Serpentine Belt Replacement</option>
+        </optgroup>
+        <optgroup label="⚙️ Transmission">
+          <option>Transmission Fluid Change</option>
+          <option>Clutch Replacement</option>
+          <option>CV Axle / Driveshaft Replacement</option>
+        </optgroup>
+        <optgroup label="🛑 Brakes">
+          <option>Brake Pad Replacement</option>
+          <option>Brake Rotor Replacement</option>
+          <option>Brake Fluid Flush</option>
+          <option>Brake Caliper Replacement</option>
+          <option>ABS Sensor Replacement</option>
+        </optgroup>
+        <optgroup label="🔩 Suspension & Steering">
+          <option>Strut / Shock Absorber Replacement</option>
+          <option>Control Arm Replacement</option>
+          <option>Ball Joint Replacement</option>
+          <option>Tie Rod Replacement</option>
+          <option>Sway Bar Link Replacement</option>
+          <option>Wheel Bearing Replacement</option>
+        </optgroup>
+        <optgroup label="⚡ Electrical">
+          <option>Battery Replacement</option>
+          <option>Alternator Replacement</option>
+          <option>Starter Motor Replacement</option>
+          <option>Oxygen Sensor Replacement</option>
+          <option>Mass Air Flow Sensor Replacement</option>
+          <option>Ignition Coil Replacement</option>
+        </optgroup>
+        <optgroup label="⛽ Fuel System">
+          <option>Fuel Filter Replacement</option>
+          <option>Fuel Injector Cleaning / Replacement</option>
+          <option>Fuel Pump Replacement</option>
+        </optgroup>
+        <optgroup label="🌡️ Cooling System">
+          <option>Radiator Replacement</option>
+          <option>Water Pump Replacement</option>
+          <option>Coolant Flush</option>
+          <option>Radiator Hose Replacement</option>
+        </optgroup>
+        <optgroup label="💨 Exhaust">
+          <option>Catalytic Converter Replacement</option>
+          <option>Muffler Replacement</option>
+          <option>Exhaust Manifold Repair</option>
+        </optgroup>
+        <optgroup label="🔄 Tires & Wheels">
+          <option>Tire Rotation</option>
+          <option>Tire Replacement</option>
+          <option>TPMS Sensor Replacement</option>
+        </optgroup>
+        <optgroup label="❄️ HVAC">
+          <option>AC Recharge / Repair</option>
+          <option>Cabin Air Filter Replacement</option>
+          <option>Heater Core Replacement</option>
+        </optgroup>
+      </select>
+      <span class="arr">▾</span>
+    </div>
+    <button class="btn btn-ghost" onclick="addRepair()">+ ADD</button>
+  </div>
+  <div class="tags" id="tags"><span class="no-tags">No services selected yet</span></div>
+  <button class="btn btn-red" id="genBtn" onclick="buildParts()" disabled>
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    GENERATE PARTS LIST
+  </button>
+</div>
+
+<!-- Parts -->
+
+<div class="card fadein hidden" id="s4">
+  <div class="p-header">
+    <div>
+      <div class="lbl" style="margin-bottom:4px;">Step 03 — Required Parts &amp; Components</div>
+      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;" id="pNote"></div>
+    </div>
+    <span class="p-count" id="pCount">0 parts</span>
+  </div>
+  <div id="pContent"></div>
+</div>
+
+<footer>VINSCAN © 2026 — Fully Offline · No External APIs · For Reference Only</footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// VIN DECODER
+// ═══════════════════════════════════════════════════════
+const WMI={
+  "1G1":"Chevrolet","1G2":"Pontiac","1G6":"Cadillac","1GC":"Chevrolet","1GT":"GMC",
+  "1GY":"Cadillac","1FA":"Ford","1FB":"Ford","1FC":"Ford","1FD":"Ford","1FM":"Ford",
+  "1FT":"Ford","1HG":"Honda","1J4":"Jeep","1J8":"Jeep","1L1":"Lincoln","1N4":"Nissan",
+  "1N6":"Nissan","1NX":"Toyota","1VW":"Volkswagen","1YV":"Mazda","2C3":"Chrysler",
+  "2D3":"Dodge","2G1":"Chevrolet","2G2":"Pontiac","2HG":"Honda","2HK":"Honda",
+  "2T1":"Toyota","2T2":"Lexus","3FA":"Ford","3N1":"Nissan","3VW":"Volkswagen",
+  "4F2":"Mazda","4F4":"Mazda","4S3":"Subaru","4S4":"Subaru","4T1":"Toyota",
+  "4T3":"Toyota","4US":"BMW","5FN":"Honda","5FR":"Acura","5J6":"Honda",
+  "5LM":"Lincoln","5NP":"Hyundai","5TD":"Toyota","5TF":"Toyota","5YJ":"Tesla",
+  "5YF":"Tesla","JF1":"Subaru","JF2":"Subaru","JH4":"Acura","JHM":"Honda",
+  "JM1":"Mazda","JM3":"Mazda","JN1":"Nissan","JN8":"Nissan","JT2":"Toyota",
+  "JT3":"Toyota","JT4":"Toyota","JT6":"Lexus","JT8":"Lexus","JTD":"Toyota",
+  "JTJ":"Lexus","KMH":"Hyundai","KNA":"Kia","KND":"Kia","SAJ":"Jaguar",
+  "SAL":"Land Rover","SCA":"Rolls-Royce","SCB":"Bentley","SCC":"Lotus",
+  "WAU":"Audi","WBA":"BMW","WBS":"BMW M","WDB":"Mercedes-Benz",
+  "WDC":"Mercedes-Benz","WDD":"Mercedes-Benz","WMW":"MINI","WP0":"Porsche",
+  "WP1":"Porsche","WVG":"Volkswagen","WVW":"Volkswagen","YV1":"Volvo",
+  "YV4":"Volvo","ZAR":"Alfa Romeo","ZFF":"Ferrari","ZHW":"Lamborghini",
+  "VF1":"Renault","VF3":"Peugeot","VF7":"Citroën","TRU":"Audi","VSS":"SEAT",
+  "1C4":"Chrysler","1B3":"Dodge","2B3":"Dodge","3C4":"Chrysler"
+};
+const CTRY={'1':'USA','2':'Canada','3':'Mexico','4':'USA','5':'USA','6':'Australia',
+  'J':'Japan','K':'South Korea','L':'China','S':'United Kingdom','V':'France',
+  'W':'Germany','X':'Russia','Y':'Sweden','Z':'Italy'};
+const YRS={A:1980,B:1981,C:1982,D:1983,E:1984,F:1985,G:1986,H:1987,J:1988,K:1989,
+  L:1990,M:1991,N:1992,P:1993,R:1994,S:1995,T:1996,V:1997,W:1998,X:1999,
+  Y:2000,'1':2001,'2':2002,'3':2003,'4':2004,'5':2005,'6':2006,'7':2007,
+  '8':2008,'9':2009,A2:2010,B2:2011,C2:2012,D2:2013,E2:2014,F2:2015,
+  G2:2016,H2:2017,J2:2018,K2:2019,L2:2020,M2:2021,N2:2022,P2:2023,R2:2024,S2:2025,T2:2026};
+
+function getYear(c){
+  if(!isNaN(+c)) return YRS[c]||null;
+  return YRS[c+'2']||YRS[c]||null;
+}
+function getBody(w){
+  if(['1FT','1GC','1GT','1N6','2D3','3C6','2B3'].includes(w)) return 'Truck / Pickup';
+  if(['1FM','1J4','1J8','2HK','4F4','5LM','5TD','KND','YV4','WDC','SAL'].includes(w)) return 'SUV / Crossover';
+  if(['5YJ','5YF','WBS','WP0','ZFF','ZHW','SCC','JM1'].includes(w)) return 'Sports Car / Coupe';
+  return 'Passenger Car / Sedan';
+}
+function chkVIN(v){
+  const m={0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,A:1,B:2,C:3,D:4,E:5,F:6,G:7,H:8,
+    J:1,K:2,L:3,M:4,N:5,P:7,R:9,S:2,T:3,U:4,V:5,W:6,X:7,Y:8,Z:9};
+  const w=[8,7,6,5,4,3,2,10,0,9,8,7,6,5,4,3,2];
+  let s=0; for(let i=0;i<17;i++) s+=(m[v[i].toUpperCase()]||0)*w[i];
+  const r=s%11,chk=r===10?'X':String(r);
+  return chk===v[8].toUpperCase();
+}
+
+// ═══════════════════════════════════════════════════════
+// PARTS DATABASE
+// ═══════════════════════════════════════════════════════
+const PARTS = {
+  "Oil Change":[
+    {name:"Engine Oil (Full Synthetic)",qty:"5–6 qt",priority:"critical",note:"Check owner's manual for viscosity grade"},
+    {name:"Oil Filter",qty:"1",priority:"critical",note:"OEM or OEM-equivalent"},
+    {name:"Drain Plug Washer / Gasket",qty:"1",priority:"recommended",note:"Replace each oil change"},
+    {name:"Funnel & drain pan",qty:"1",priority:"optional",note:"If doing DIY"}
+  ],
+  "Spark Plug Replacement":[
+    {name:"Spark Plugs (Iridium or Platinum)",qty:"1 per cylinder",priority:"critical",note:"Match OEM gap spec"},
+    {name:"Spark Plug Boots / Wire Set",qty:"1 set",priority:"recommended",note:"Inspect for cracks"},
+    {name:"Dielectric Grease",qty:"1 tube",priority:"recommended",note:"Apply to boot interior"},
+    {name:"Anti-Seize Compound",qty:"1 tube",priority:"optional",note:"For aluminum heads only"}
+  ],
+  "Timing Belt / Chain Replacement":[
+    {name:"Timing Belt or Chain Kit",qty:"1 kit",priority:"critical",note:"Includes tensioner & guides"},
+    {name:"Water Pump",qty:"1",priority:"critical",note:"Replace simultaneously — same labor"},
+    {name:"Thermostat",qty:"1",priority:"recommended",note:"Inspect existing before reuse"},
+    {name:"Serpentine Belt",qty:"1",priority:"recommended",note:"Replace if original"},
+    {name:"Coolant",qty:"1 gal",priority:"recommended",note:"If water pump replaced"},
+    {name:"Tensioner Pulley",qty:"1",priority:"critical",note:"Included in most kits"},
+    {name:"Idler Pulley",qty:"1–2",priority:"critical",note:"Inspect all pulleys"}
+  ],
+  "Head Gasket Repair":[
+    {name:"Head Gasket Set",qty:"1 set",priority:"critical",note:"Full top-end gasket kit recommended"},
+    {name:"Head Bolts (Torque-to-Yield)",qty:"1 set",priority:"critical",note:"TTY bolts must not be reused"},
+    {name:"Engine Coolant",qty:"1 gal",priority:"critical",note:"Full flush required"},
+    {name:"Engine Oil & Filter",qty:"1 set",priority:"critical",note:"Replace after head gasket work"},
+    {name:"Intake Manifold Gasket",qty:"1 set",priority:"recommended",note:"Replace while disassembled"},
+    {name:"Exhaust Manifold Gasket",qty:"1 set",priority:"recommended",note:"Inspect and replace"},
+    {name:"Valve Cover Gasket",qty:"1",priority:"recommended",note:"Easy access while apart"},
+    {name:"Thread Sealer / RTV Silicone",qty:"1 tube",priority:"recommended",note:"For water jacket bolts"}
+  ],
+  "Engine Air Filter Replacement":[
+    {name:"Engine Air Filter",qty:"1",priority:"critical",note:"Paper or washable — check spec"},
+    {name:"Air Box Clips / Screws",qty:"1 set",priority:"optional",note:"Replace if damaged"}
+  ],
+  "Coolant / Thermostat Service":[
+    {name:"Thermostat",qty:"1",priority:"critical",note:"Match OEM temperature rating"},
+    {name:"Thermostat Housing Gasket",qty:"1",priority:"critical",note:"Or use RTV if no gasket"},
+    {name:"Engine Coolant (50/50 Pre-Mix)",qty:"1 gal",priority:"critical",note:"Check OAT vs HOAT spec"},
+    {name:"Radiator Drain Plug / Petcock",qty:"1",priority:"optional",note:"Replace if stripped"}
+  ],
+  "PCV Valve Replacement":[
+    {name:"PCV Valve",qty:"1",priority:"critical",note:"Match engine displacement"},
+    {name:"PCV Hose / Grommet",qty:"1 set",priority:"recommended",note:"Inspect for cracking"}
+  ],
+  "Valve Cover Gasket Replacement":[
+    {name:"Valve Cover Gasket Set",qty:"1 set",priority:"critical",note:"Includes spark plug tube seals"},
+    {name:"Valve Cover Bolt Grommets",qty:"1 set",priority:"critical",note:"Often part of gasket set"},
+    {name:"RTV Silicone Sealant",qty:"1 tube",priority:"recommended",note:"For corners and end seals"},
+    {name:"Engine Oil",qty:"1 qt",priority:"optional",note:"Top-off if low"}
+  ],
+  "Serpentine Belt Replacement":[
+    {name:"Serpentine Belt",qty:"1",priority:"critical",note:"Verify length and rib count"},
+    {name:"Belt Tensioner Assembly",qty:"1",priority:"recommended",note:"Replace if worn"},
+    {name:"Idler Pulley",qty:"1",priority:"recommended",note:"Inspect bearing play"}
+  ],
+  "Transmission Fluid Change":[
+    {name:"Automatic Transmission Fluid (ATF)",qty:"4–8 qt",priority:"critical",note:"Must match OEM spec (e.g. Dexron VI)"},
+    {name:"Transmission Filter",qty:"1",priority:"critical",note:"For pan-type transmissions"},
+    {name:"Transmission Pan Gasket",qty:"1",priority:"critical",note:"Replace with fluid change"},
+    {name:"Trans Pan Drain Plug Washer",qty:"1",priority:"recommended",note:"If equipped with drain plug"}
+  ],
+  "Clutch Replacement":[
+    {name:"Clutch Disc",qty:"1",priority:"critical",note:"Match spline count and diameter"},
+    {name:"Pressure Plate Assembly",qty:"1",priority:"critical",note:"Replace with disc — never alone"},
+    {name:"Release / Throw-Out Bearing",qty:"1",priority:"critical",note:"Always replace with clutch"},
+    {name:"Pilot Bearing / Bushing",qty:"1",priority:"critical",note:"Inspect and replace"},
+    {name:"Flywheel",qty:"1",priority:"recommended",note:"Resurface or replace if scored"},
+    {name:"Clutch Alignment Tool",qty:"1",priority:"recommended",note:"Required for installation"}
+  ],
+  "CV Axle / Driveshaft Replacement":[
+    {name:"CV Axle Shaft (Reman or OEM)",qty:"1 per side",priority:"critical",note:"Includes inner & outer CV joints"},
+    {name:"CV Boot Kit",qty:"1",priority:"recommended",note:"If only boot is torn"},
+    {name:"CV Axle Nut",qty:"1",priority:"critical",note:"Single-use — must replace"},
+    {name:"CV Axle Nut Cotter Pin",qty:"1",priority:"recommended",note:"If applicable"},
+    {name:"Front Wheel Bearing Grease",qty:"1 tube",priority:"optional",note:"Inspect bearing while apart"}
+  ],
+  "Brake Pad Replacement":[
+    {name:"Brake Pads (Front or Rear)",qty:"1 set (4 pads)",priority:"critical",note:"OEM or ceramic recommended"},
+    {name:"Brake Caliper Lube / Grease",qty:"1 tube",priority:"critical",note:"For slide pins and contact points"},
+    {name:"Brake Hardware Kit",qty:"1",priority:"recommended",note:"Anti-rattle clips and shims"},
+    {name:"Brake Cleaner Spray",qty:"1 can",priority:"recommended",note:"Clean rotor surface"},
+    {name:"Brake Pad Wear Sensors",qty:"1 per corner",priority:"recommended",note:"If equipped — check before reuse"}
+  ],
+  "Brake Rotor Replacement":[
+    {name:"Brake Rotors",qty:"2 (axle pair)",priority:"critical",note:"Always replace in pairs"},
+    {name:"Brake Pads",qty:"1 set",priority:"critical",note:"Replace pads with rotors"},
+    {name:"Brake Caliper Lube",qty:"1 tube",priority:"critical",note:"Slide pins and hardware"},
+    {name:"Brake Hardware Kit",qty:"1",priority:"recommended",note:"Clips and shims"},
+    {name:"Brake Cleaner",qty:"1 can",priority:"recommended",note:"Clean before install"},
+    {name:"Rotor Retaining Screws",qty:"2",priority:"optional",note:"If OEM screws are stripped"}
+  ],
+  "Brake Fluid Flush":[
+    {name:"DOT 3 or DOT 4 Brake Fluid",qty:"32 oz",priority:"critical",note:"Check OEM spec — do not mix"},
+    {name:"Brake Bleeder Wrench / Kit",qty:"1",priority:"recommended",note:"One-man bleeder kit recommended"},
+    {name:"Clear Vinyl Tubing",qty:"1 ft",priority:"optional",note:"For manual bleed method"}
+  ],
+  "Brake Caliper Replacement":[
+    {name:"Brake Caliper (Reman)",qty:"1 per corner",priority:"critical",note:"Include bracket if worn"},
+    {name:"Caliper Mounting Bolts",qty:"2",priority:"critical",note:"Often one-time use — replace"},
+    {name:"Brake Pads",qty:"1 set",priority:"critical",note:"Replace with new caliper"},
+    {name:"Brake Rotor",qty:"1",priority:"recommended",note:"Inspect — replace if scored"},
+    {name:"Brake Fluid",qty:"12 oz",priority:"critical",note:"Top off and bleed after"},
+    {name:"Caliper Slide Pin Kit",qty:"1",priority:"recommended",note:"If not included with caliper"}
+  ],
+  "ABS Sensor Replacement":[
+    {name:"ABS Wheel Speed Sensor",qty:"1",priority:"critical",note:"Match front or rear position"},
+    {name:"ABS Sensor Wire Harness",qty:"1",priority:"recommended",note:"Inspect for corrosion"},
+    {name:"Sensor Mounting Bolt",qty:"1",priority:"recommended",note:"Often seizes — replace"}
+  ],
+  "Strut / Shock Absorber Replacement":[
+    {name:"Strut / Shock Assembly",qty:"2 (axle pair)",priority:"critical",note:"Replace in pairs"},
+    {name:"Strut Mounts (Top Mounts)",qty:"2",priority:"critical",note:"Replace with struts"},
+    {name:"Coil Springs",qty:"2",priority:"recommended",note:"Inspect — replace if sagged"},
+    {name:"Bump Stops",qty:"2",priority:"recommended",note:"Often worn with old struts"},
+    {name:"Dust Boots",qty:"2",priority:"recommended",note:"Protect new shocks"},
+    {name:"Sway Bar End Links",qty:"2",priority:"optional",note:"Easy to replace while apart"}
+  ],
+  "Control Arm Replacement":[
+    {name:"Control Arm Assembly",qty:"1 per side",priority:"critical",note:"With bushings and ball joint pre-installed"},
+    {name:"Control Arm Bolts",qty:"1 set",priority:"critical",note:"Torque-to-yield — do not reuse"},
+    {name:"Ball Joint",qty:"1",priority:"critical",note:"Often included with arm"},
+    {name:"Alignment (service)",qty:"—",priority:"critical",note:"Required after control arm replacement"},
+    {name:"Control Arm Bushings",qty:"1 set",priority:"recommended",note:"If replacing arms separately"}
+  ],
+  "Ball Joint Replacement":[
+    {name:"Ball Joint (Upper or Lower)",qty:"1 per side",priority:"critical",note:"Match OEM greaseable or sealed"},
+    {name:"Cotter Pin",qty:"1",priority:"critical",note:"Single use — always replace"},
+    {name:"Castle Nut",qty:"1",priority:"recommended",note:"Replace if worn"},
+    {name:"Ball Joint Grease",qty:"1 tube",priority:"recommended",note:"If greaseable type"},
+    {name:"Alignment (service)",qty:"—",priority:"critical",note:"Required after replacement"}
+  ],
+  "Tie Rod Replacement":[
+    {name:"Outer Tie Rod End",qty:"1 per side",priority:"critical",note:"Comes with jam nut"},
+    {name:"Inner Tie Rod End",qty:"1 per side",priority:"recommended",note:"Inspect inner while replacing outer"},
+    {name:"Tie Rod Boot / Boot Kit",qty:"1",priority:"recommended",note:"Replace if torn"},
+    {name:"Alignment (service)",qty:"—",priority:"critical",note:"Required after any tie rod work"},
+    {name:"Cotter Pin",qty:"1",priority:"critical",note:"Single use — replace"}
+  ],
+  "Sway Bar Link Replacement":[
+    {name:"Sway Bar End Links",qty:"2",priority:"critical",note:"Replace both sides"},
+    {name:"Sway Bar Bushing Kit",qty:"1",priority:"recommended",note:"Inspect while accessible"},
+    {name:"Sway Bar Bracket Bolts",qty:"1 set",priority:"optional",note:"Replace if corroded"}
+  ],
+  "Wheel Bearing Replacement":[
+    {name:"Wheel Bearing / Hub Assembly",qty:"1",priority:"critical",note:"Pressed or bolt-on type"},
+    {name:"Hub Nut / Axle Nut",qty:"1",priority:"critical",note:"Single-use — always replace"},
+    {name:"Wheel Bearing Grease",qty:"1 tube",priority:"recommended",note:"For pressed-in bearings"},
+    {name:"Cotter Pin",qty:"1",priority:"recommended",note:"If applicable"}
+  ],
+  "Battery Replacement":[
+    {name:"12V Automotive Battery",qty:"1",priority:"critical",note:"Match CCA and group size"},
+    {name:"Battery Terminal Cleaner",qty:"1",priority:"recommended",note:"Clean posts before install"},
+    {name:"Battery Terminal Protector Spray",qty:"1",priority:"recommended",note:"Prevent corrosion"},
+    {name:"Battery Hold-Down Bracket",qty:"1",priority:"optional",note:"Replace if corroded or missing"}
+  ],
+  "Alternator Replacement":[
+    {name:"Alternator (Reman or OEM)",qty:"1",priority:"critical",note:"Match amperage output"},
+    {name:"Serpentine Belt",qty:"1",priority:"recommended",note:"Replace if worn while accessible"},
+    {name:"Battery",qty:"1",priority:"recommended",note:"Test existing — replace if weak"},
+    {name:"Alternator Mounting Bolts",qty:"1 set",priority:"recommended",note:"Replace if corroded"}
+  ],
+  "Starter Motor Replacement":[
+    {name:"Starter Motor (Reman)",qty:"1",priority:"critical",note:"Match engine & flywheel teeth count"},
+    {name:"Starter Mounting Bolts",qty:"2",priority:"recommended",note:"Replace if corroded"},
+    {name:"Battery",qty:"1",priority:"recommended",note:"Test — weak battery kills starters"},
+    {name:"Starter Solenoid",qty:"1",priority:"optional",note:"May be included with new starter"}
+  ],
+  "Oxygen Sensor Replacement":[
+    {name:"Oxygen / O2 Sensor",qty:"1–4",priority:"critical",note:"Match upstream or downstream position"},
+    {name:"Anti-Seize Compound",qty:"1 tube",priority:"recommended",note:"Apply to threads before install"},
+    {name:"O2 Sensor Socket (7/8\")",qty:"1",priority:"recommended",note:"Slotted for wire clearance"}
+  ],
+  "Mass Air Flow Sensor Replacement":[
+    {name:"Mass Air Flow (MAF) Sensor",qty:"1",priority:"critical",note:"OEM preferred for accuracy"},
+    {name:"MAF Sensor Cleaner Spray",qty:"1 can",priority:"recommended",note:"Try cleaning before replacing"},
+    {name:"Air Filter",qty:"1",priority:"recommended",note:"Dirty filter causes MAF failure"},
+    {name:"MAF Sensor Screws",qty:"2",priority:"optional",note:"Replace Torx screws if stripped"}
+  ],
+  "Ignition Coil Replacement":[
+    {name:"Ignition Coil(s)",qty:"1 per cylinder (or 1)",priority:"critical",note:"COP or distributor type"},
+    {name:"Spark Plugs",qty:"1 per cylinder",priority:"recommended",note:"Replace while coils are out"},
+    {name:"Coil Boot(s)",qty:"1 set",priority:"recommended",note:"Check for carbon tracking"},
+    {name:"Dielectric Grease",qty:"1 tube",priority:"recommended",note:"Apply to coil boots"}
+  ],
+  "Fuel Filter Replacement":[
+    {name:"Fuel Filter",qty:"1",priority:"critical",note:"In-line or in-tank type"},
+    {name:"Fuel Filter O-Rings / Clips",qty:"1 set",priority:"critical",note:"Included with filter or buy separately"},
+    {name:"Fuel Line Quick-Connect Tool",qty:"1",priority:"recommended",note:"For plastic quick-connect fittings"}
+  ],
+  "Fuel Injector Cleaning / Replacement":[
+    {name:"Fuel Injectors",qty:"1 per cylinder (if replacing)",priority:"critical",note:"Match flow rate and connector type"},
+    {name:"Fuel Injector O-Rings",qty:"2 per injector",priority:"critical",note:"Upper and lower seals"},
+    {name:"Fuel Injector Cleaner (additive)",qty:"1 bottle",priority:"recommended",note:"For cleaning service only"},
+    {name:"Fuel Rail Pressure Damper",qty:"1",priority:"optional",note:"Inspect while rail is off"},
+    {name:"Intake Manifold Gasket",qty:"1",priority:"recommended",note:"Replace if removed"}
+  ],
+  "Fuel Pump Replacement":[
+    {name:"Fuel Pump Module / Assembly",qty:"1",priority:"critical",note:"Includes float / sending unit"},
+    {name:"Fuel Pump Lock Ring",qty:"1",priority:"critical",note:"Single-use — always replace"},
+    {name:"Fuel Pump O-Ring / Seal",qty:"1",priority:"critical",note:"Included with most pumps"},
+    {name:"Fuel Filter",qty:"1",priority:"recommended",note:"Replace while pump is accessible"},
+    {name:"Fuel Pump Sock / Strainer",qty:"1",priority:"recommended",note:"Usually included in pump kit"}
+  ],
+  "Radiator Replacement":[
+    {name:"Radiator",qty:"1",priority:"critical",note:"Match core size and connection count"},
+    {name:"Upper & Lower Radiator Hoses",qty:"1 set",priority:"critical",note:"Replace with new radiator"},
+    {name:"Coolant",qty:"1 gal",priority:"critical",note:"Match OEM coolant type"},
+    {name:"Radiator Cap",qty:"1",priority:"recommended",note:"Replace if over 2 years old"},
+    {name:"Thermostat",qty:"1",priority:"recommended",note:"Replace while system is drained"},
+    {name:"Coolant Overflow Tank",qty:"1",priority:"optional",note:"Inspect for cracks"}
+  ],
+  "Water Pump Replacement":[
+    {name:"Water Pump",qty:"1",priority:"critical",note:"OEM gasket or O-ring included"},
+    {name:"Water Pump Gasket / O-Ring",qty:"1",priority:"critical",note:"Or use RTV if required"},
+    {name:"Engine Coolant",qty:"1 gal",priority:"critical",note:"Full flush recommended"},
+    {name:"Thermostat",qty:"1",priority:"recommended",note:"Easy replace while pump is out"},
+    {name:"Radiator Hoses",qty:"1 set",priority:"optional",note:"Inspect age before reuse"}
+  ],
+  "Coolant Flush":[
+    {name:"Engine Coolant (50/50 Mix)",qty:"1 gal",priority:"critical",note:"Match OAT / HOAT spec"},
+    {name:"Distilled Water",qty:"1 gal",priority:"critical",note:"For dilution if using concentrate"},
+    {name:"Cooling System Flush Chemical",qty:"1 bottle",priority:"recommended",note:"Neutralizes scale and rust"},
+    {name:"Radiator Cap",qty:"1",priority:"optional",note:"Replace if pressure tests low"}
+  ],
+  "Radiator Hose Replacement":[
+    {name:"Upper Radiator Hose",qty:"1",priority:"critical",note:""},
+    {name:"Lower Radiator Hose",qty:"1",priority:"critical",note:""},
+    {name:"Hose Clamps",qty:"4",priority:"critical",note:"OEM worm-drive or spring clamp"},
+    {name:"Engine Coolant",qty:"1 qt",priority:"recommended",note:"Top off after replacement"}
+  ],
+  "Catalytic Converter Replacement":[
+    {name:"Catalytic Converter",qty:"1",priority:"critical",note:"CARB or Federal — check state laws"},
+    {name:"Exhaust Manifold Gasket",qty:"1",priority:"critical",note:"Replace flange gasket"},
+    {name:"Oxygen Sensors",qty:"1–2",priority:"recommended",note:"Upstream and downstream"},
+    {name:"Exhaust Flange Nuts / Studs",qty:"1 set",priority:"recommended",note:"Often seized — replace"},
+    {name:"Anti-Seize Compound",qty:"1 tube",priority:"recommended",note:"All exhaust fasteners"}
+  ],
+  "Muffler Replacement":[
+    {name:"Muffler",qty:"1",priority:"critical",note:"Direct-fit or universal"},
+    {name:"Exhaust Clamps",qty:"2",priority:"critical",note:"U-bolt or band style"},
+    {name:"Exhaust Hangers / Rubber Isolators",qty:"1 set",priority:"recommended",note:"Inspect all hangers"},
+    {name:"Exhaust Pipe Section",qty:"1",priority:"optional",note:"If intermediate pipe is rusted"}
+  ],
+  "Exhaust Manifold Repair":[
+    {name:"Exhaust Manifold",qty:"1",priority:"critical",note:"Cast iron or aftermarket"},
+    {name:"Exhaust Manifold Gasket",qty:"1 set",priority:"critical",note:"Multi-layer steel preferred"},
+    {name:"Manifold Studs",qty:"1 set",priority:"critical",note:"Broken studs must be extracted & replaced"},
+    {name:"Exhaust Manifold Bolts / Nuts",qty:"1 set",priority:"critical",note:"Single-use — always replace"},
+    {name:"High-Temp Anti-Seize",qty:"1 tube",priority:"recommended",note:"All exhaust fasteners"},
+    {name:"Oxygen Sensor",qty:"1",priority:"optional",note:"If manifold-mounted — inspect"}
+  ],
+  "AC Recharge / Repair":[
+    {name:"R-134a or R-1234yf Refrigerant",qty:"Per system spec",priority:"critical",note:"Check label under hood"},
+    {name:"AC Compressor",qty:"1",priority:"critical",note:"If compressor has failed"},
+    {name:"AC Compressor Oil (PAG)",qty:"1 bottle",priority:"critical",note:"Match compressor type"},
+    {name:"Receiver / Drier",qty:"1",priority:"critical",note:"Replace any time system is opened"},
+    {name:"Expansion Valve / Orifice Tube",qty:"1",priority:"recommended",note:"Replace with compressor"},
+    {name:"AC O-Ring Kit",qty:"1 set",priority:"critical",note:"All fittings — mandatory on reopen"},
+    {name:"Condenser",qty:"1",priority:"optional",note:"Inspect for damage or leaks"}
+  ],
+  "Cabin Air Filter Replacement":[
+    {name:"Cabin Air Filter",qty:"1",priority:"critical",note:"Check carbon vs standard type"},
+    {name:"Cabin Filter Housing Clips",qty:"1 set",priority:"optional",note:"Replace if broken"}
+  ],
+  "Heater Core Replacement":[
+    {name:"Heater Core",qty:"1",priority:"critical",note:"Exact fit required — labor-intensive"},
+    {name:"Heater Core Hoses",qty:"2",priority:"critical",note:"Replace with core"},
+    {name:"Hose Clamps",qty:"4",priority:"critical",note:"OEM clamps"},
+    {name:"Engine Coolant",qty:"1 gal",priority:"critical",note:"Full system flush after replacement"},
+    {name:"Dash Foam Tape / Seals",qty:"1 set",priority:"recommended",note:"Prevents air leaks from dash"},
+    {name:"Blend Door Actuator",qty:"1",priority:"optional",note:"Inspect while dash is apart"}
+  ],
+  "Tire Rotation":[
+    {name:"Torque Wrench (Calibrated)",qty:"1",priority:"recommended",note:"Lug nut torque varies by vehicle"},
+    {name:"Valve Stem Caps",qty:"4",priority:"optional",note:"Replace if missing or cracked"},
+    {name:"TPMS Reset Tool",qty:"1",priority:"optional",note:"If vehicle has TPMS"}
+  ],
+  "Tire Replacement":[
+    {name:"Tires",qty:"2 or 4",priority:"critical",note:"Match OEM size on door placard"},
+    {name:"Valve Stems",qty:"1 per tire",priority:"critical",note:"Replace when mounting new tires"},
+    {name:"Wheel Weights",qty:"Per balance",priority:"critical",note:"Dynamic balance required"},
+    {name:"TPMS Sensors",qty:"4",priority:"recommended",note:"Replace rubber valve TPMS sensors"},
+    {name:"Lug Nuts",qty:"Per wheel",priority:"optional",note:"Replace if corroded or swollen"}
+  ],
+  "TPMS Sensor Replacement":[
+    {name:"TPMS Sensor",qty:"1 per wheel",priority:"critical",note:"Match frequency (315MHz or 433MHz)"},
+    {name:"TPMS Service Kit",qty:"1 per sensor",priority:"critical",note:"Valve stem, cap, core, nut, grommet"},
+    {name:"TPMS Programming Tool",qty:"1",priority:"recommended",note:"Required to sync to ECU"}
+  ],
+  "Wheel Alignment":[
+    {name:"Alignment Shims (if needed)",qty:"Per axle",priority:"recommended",note:"Eccentric bolts or cam bolts"},
+    {name:"Tie Rod Ends",qty:"Per inspection",priority:"optional",note:"Replace worn components found"},
+    {name:"Camber Bolts / Eccentric Bolts",qty:"Per axle",priority:"optional",note:"For alignment adjustment"}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════
+let VD={}, repairs=[];
+
+function ls(v){
+  document.getElementById('vinInput').value=v;
+  decodeVIN();
+}
+
+function restartApp(){
+  VD={}; repairs=[];
+  document.getElementById('vinInput').value='';
+  document.getElementById('errBox').className='err';
+  document.getElementById('decodeBtn').disabled=false;
+  document.getElementById('decodeBtn').textContent='DECODE';
+  hide('s2'); hide('s3'); hide('s4');
+  document.getElementById('repSel').value='';
+  document.getElementById('tags').innerHTML='<span class="no-tags">No services selected yet</span>';
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('genBtn').innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> GENERATE PARTS LIST';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function decodeVIN(){
+  const vin=document.getElementById('vinInput').value.trim().toUpperCase();
+  const err=document.getElementById('errBox');
+  err.className='err';
+  hide('s2'); hide('s3'); hide('s4');
+
+  if(vin.length!==17) return showErr('VIN must be exactly 17 characters.');
+  if(/[IOQ]/i.test(vin)) return showErr('VIN cannot contain the letters I, O, or Q.');
+  if(!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) return showErr('VIN contains invalid characters.');
+
+  const wmi=vin.slice(0,3);
+  const make=WMI[wmi]||WMI[vin.slice(0,2)+'1']||'Unknown Make';
+  const year=getYear(vin[9]);
+  const body=getBody(wmi);
+  const country=CTRY[vin[0]]||'Unknown';
+  const valid=chkVIN(vin);
+  const seq=parseInt(vin.slice(11),10).toLocaleString();
+
+  VD={vin,make,year,body,country,wmi,seq,valid};
+  repairs=[];
+  renderTags();
+  document.getElementById('genBtn').disabled=true;
+
+  document.getElementById('vTitle').textContent=`${year||'—'} ${make}`;
+  document.getElementById('vSub').textContent=`VIN: ${vin}`;
+
+  const fields=[
+    {l:'Model Year',v:year||'Unknown',hl:true},
+    {l:'Manufacturer',v:make},
+    {l:'Country',v:country},
+    {l:'Body Style',v:body},
+    {l:'WMI Code',v:wmi},
+    {l:'Descriptor (VDS)',v:vin.slice(3,9)},
+    {l:'Plant Code',v:vin[10]},
+    {l:'Production #',v:'#'+seq},
+    {l:'Check Digit',v:valid?'✓ Valid':'⚠ Mismatch',hl:valid},
+  ];
+  document.getElementById('infoGrid').innerHTML=fields.map(f=>
+    `<div class="cell"><div class="cell-l">${f.l}</div><div class="cell-v${f.hl?' hl':''}">${f.v}</div></div>`
+  ).join('');
+
+  show('s2'); show('s3');
+}
+
+function showErr(m){
+  const e=document.getElementById('errBox');
+  e.className='err show';
+  e.textContent='⚠ '+m;
+}
+
+function show(id){
+  const el=document.getElementById(id);
+  el.classList.remove('hidden');
+  el.classList.add('fadein');
+}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+
+function addRepair(){
+  const sel=document.getElementById('repSel');
+  const v=sel.value;
+  if(!v||repairs.includes(v)){sel.value='';return;}
+  repairs.push(v); sel.value='';
+  renderTags();
+  document.getElementById('genBtn').disabled=false;
+  hide('s4');
+}
+
+function removeRepair(i){
+  repairs.splice(i,1);
+  renderTags();
+  document.getElementById('genBtn').disabled=repairs.length===0;
+}
+
+function renderTags(){
+  const c=document.getElementById('tags');
+  c.innerHTML=repairs.length
+    ?repairs.map((r,i)=>`<div class="tag">${r}<span class="tx" onclick="removeRepair(${i})">×</span></div>`).join('')
+    :'<span class="no-tags">No services selected yet</span>';
+}
+
+function buildParts(){
+  if(!repairs.length) return;
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  btn.innerHTML='<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;"></div> BUILDING…';
+
+  // Small delay for UX feel
+  setTimeout(()=>{
+    let total=0, html='';
+    repairs.forEach(svc=>{
+      const parts=PARTS[svc];
+      if(!parts||!parts.length) return;
+      total+=parts.length;
+      html+=`<div class="grp">
+        <div class="grp-title">${svc}</div>
+        <table>
+          <thead><tr><th>Part Name</th><th>Qty</th><th>Priority</th><th>Note</th></tr></thead>
+          <tbody>
+            ${parts.map(p=>`<tr>
+              <td class="pn">${p.name}</td>
+              <td class="pq">${p.qty}</td>
+              <td><span class="pri pr-${p.priority}">${p.priority}</span></td>
+              <td class="pno">${p.note||'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    });
+
+    if(!html){
+      html=`<div style="color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;text-align:center;">No parts data found for selected services.</div>`;
+      total=0;
+    }
+
+    document.getElementById('pContent').innerHTML=html;
+    document.getElementById('pNote').textContent=`${VD.year||''} ${VD.make} · ${repairs.length} service${repairs.length!==1?'s':''}`;
+    document.getElementById('pCount').textContent=`${total} part${total!==1?'s':''}`;
+    show('s4');
+    document.getElementById('s4').scrollIntoView({behavior:'smooth',block:'start'});
+
+    btn.disabled=false;
+    btn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> REGENERATE PARTS LIST';
+  },400);
+}
+
+document.getElementById('vinInput').addEventListener('keydown',e=>{if(e.key==='Enter')decodeVIN();});
+</script>
+
+</body>
+</html>
