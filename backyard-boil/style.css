@@ -601,6 +601,101 @@ p { margin: 0 0 14px; }
 }
 .menu-card-addons { grid-column: span 1; }
 
+/* ============ JAR ============ */
+.jar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 60px;
+  align-items: center;
+}
+@media (max-width: 880px) { .jar-grid { grid-template-columns: 1fr; gap: 36px; } }
+
+.jar-photo {
+  aspect-ratio: 4/5;
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(45deg, rgba(253,235,208,0.06) 0 8px, transparent 8px 16px),
+    #1a1310;
+  border: 2px dashed rgba(253,235,208,0.4);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(253,235,208,0.75);
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+}
+.jar-photo .ph-icon { font-size: 64px; }
+.jar-photo .ph-label { font-size: 13px; font-weight: 600; opacity: 0.7; text-align: center; padding: 0 16px; }
+.jar-photo.has-photo { border-style: solid; border-color: transparent; }
+.jar-photo.has-photo .ph-icon, .jar-photo.has-photo .ph-label { display: none; }
+
+.jar-copy h2 { color: #fff8ee; }
+.jar-copy h2 em { color: var(--accent); }
+.jar-copy .eyebrow {
+  color: var(--accent);
+  letter-spacing: 0.14em;
+}
+.jar-copy p {
+  color: rgba(253,235,208,0.78);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.jar-copy p strong { color: #fff8ee; }
+.jar-lead {
+  font-size: 18px;
+  color: #fff8ee !important;
+  font-weight: 500;
+}
+.jar-pricing {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 22px 0 24px;
+  padding: 18px 22px;
+  background: rgba(253,235,208,0.06);
+  border: 1px solid rgba(253,235,208,0.15);
+  border-radius: var(--radius-sm);
+}
+.jar-price strong {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50;
+  line-height: 1;
+  display: block;
+}
+.jar-price span {
+  display: block;
+  font-size: 12px;
+  color: rgba(253,235,208,0.6);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.jar-flavors { display: flex; gap: 10px; flex-wrap: wrap; }
+.jar-flavor {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.jar-mild  { background: rgba(253,235,208,0.12); color: #fff8ee; border: 1px solid rgba(253,235,208,0.25); }
+.jar-spicy { background: rgba(214,40,40,0.2); color: #fff; border: 1px solid var(--brand); }
+.jar-fineprint {
+  margin-top: 14px;
+  font-size: 12px;
+  color: rgba(253,235,208,0.5);
+  letter-spacing: 0.05em;
+}
+
 /* ============ GALLERY ============ */
 .gallery {
   display: grid;
