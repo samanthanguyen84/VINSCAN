@@ -601,6 +601,32 @@ p { margin: 0 0 14px; }
 }
 .menu-card-addons { grid-column: span 1; }
 
+.offseason-teaser {
+  margin-top: 28px;
+  padding: 18px 22px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, rgba(214,40,40,0.07) 0%, rgba(247,127,0,0.07) 100%);
+  border: 1px dashed rgba(214,40,40,0.35);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.offseason-teaser .ot-icon { font-size: 28px; line-height: 1; }
+.offseason-teaser .ot-text { display: flex; flex-direction: column; gap: 4px; }
+.offseason-teaser strong {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--brand);
+  letter-spacing: -0.005em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 70;
+  font-style: italic;
+  font-weight: 600;
+}
+.offseason-teaser span { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+@media (max-width: 560px) {
+  .offseason-teaser { flex-direction: column; align-items: flex-start; text-align: left; }
+}
+
 /* ============ JAR ============ */
 .jar-grid {
   display: grid;
