@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Backyard Boil — Viet Cajun Crawfish · Austin, TX</title>
-<meta name="description" content="Viet Cajun garlic butter crawfish boil. Saturday pickup in NE Austin / Tech Ridge. $12/lb, 3 lb minimum. Order online — message us to confirm." />
+<meta name="description" content="Viet Cajun garlic butter crawfish boil. Saturday pickup in NE Austin / Tech Ridge. $12/lb, 3 lb minimum. Order ahead, skip the line." />
 <meta property="og:title" content="Backyard Boil — Viet Cajun Crawfish" />
 <meta property="og:description" content="$12/lb Viet Cajun garlic butter crawfish. Saturday pickup in NE Austin." />
 <meta property="og:type" content="website" />
@@ -44,7 +44,7 @@
         Up to <strong>1,000 lbs of crawfish</strong> hand-boiled in garlic butter every weekend. Saturday pickup only — NE Austin / Tech Ridge.
       </p>
       <div class="hero-cta">
-        <a href="#order" class="btn btn-primary btn-lg">Start Your Order →</a>
+        <a href="#order" class="btn btn-primary btn-lg">Order Now →</a>
         <a href="#menu" class="btn btn-ghost btn-lg">See the Menu</a>
       </div>
       <div class="hero-stats">
@@ -139,216 +139,28 @@
   </div>
 </section>
 
-<!-- ============ ORDER FORM ============ -->
+<!-- ============ ORDER (EMBED) ============ -->
 <section id="order" class="section section-dark">
   <div class="container">
     <span class="eyebrow eyebrow-light">Place your order</span>
     <h2>Build Your Boil</h2>
     <p class="lead">Orders close <strong>Thursday 11:59 PM</strong> or when we sell out. Saturday pickup only.</p>
 
-    <form id="orderForm" class="order-form" novalidate>
-      <div class="form-grid">
-        <!-- LEFT: configurator -->
-        <div class="form-left">
-
-          <fieldset class="field">
-            <legend>Crawfish</legend>
-            <div class="lb-controls">
-              <button type="button" class="qty-btn" data-action="dec" aria-label="Decrease">−</button>
-              <div class="lb-display">
-                <input type="number" id="lbs" name="lbs" min="3" max="200" step="1" value="5" inputmode="numeric" />
-                <span class="lb-label">lbs</span>
-              </div>
-              <button type="button" class="qty-btn" data-action="inc" aria-label="Increase">+</button>
-            </div>
-            <div class="quick-picks">
-              <button type="button" class="pick" data-lbs="3">3 lb</button>
-              <button type="button" class="pick is-active" data-lbs="5">5 lb</button>
-              <button type="button" class="pick" data-lbs="10">10 lb</button>
-              <button type="button" class="pick" data-lbs="20">20 lb</button>
-            </div>
-            <div class="help">3 lb minimum. Every 5 lbs comes with sausage, potato &amp; corn.</div>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Spice Level</legend>
-            <div class="spice-pick">
-              <label class="spice-opt" data-level="1">
-                <input type="radio" name="spice" value="1 - Mild" />
-                <span class="chip chip-1">1</span> Mild
-              </label>
-              <label class="spice-opt is-active" data-level="2">
-                <input type="radio" name="spice" value="2 - Medium" checked />
-                <span class="chip chip-2">2</span> Medium
-              </label>
-              <label class="spice-opt" data-level="3">
-                <input type="radio" name="spice" value="3 - Spicy" />
-                <span class="chip chip-3">3</span> Spicy
-              </label>
-              <label class="spice-opt" data-level="4">
-                <input type="radio" name="spice" value="4 - XSpicy" />
-                <span class="chip chip-4">4</span> XSpicy
-              </label>
-            </div>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Add-Ons</legend>
-            <div class="addons">
-              <div class="addon">
-                <div>
-                  <div class="addon-name">Whole Corn</div>
-                  <div class="addon-price">$2 each</div>
-                </div>
-                <div class="addon-qty">
-                  <button type="button" class="qty-btn sm" data-addon="corn" data-action="dec">−</button>
-                  <input type="number" min="0" max="50" value="0" name="addon_corn" data-addon="corn" />
-                  <button type="button" class="qty-btn sm" data-addon="corn" data-action="inc">+</button>
-                </div>
-              </div>
-              <div class="addon">
-                <div>
-                  <div class="addon-name">Sausage</div>
-                  <div class="addon-price">$6 / lb</div>
-                </div>
-                <div class="addon-qty">
-                  <button type="button" class="qty-btn sm" data-addon="sausage" data-action="dec">−</button>
-                  <input type="number" min="0" max="20" value="0" name="addon_sausage" data-addon="sausage" />
-                  <button type="button" class="qty-btn sm" data-addon="sausage" data-action="inc">+</button>
-                </div>
-              </div>
-              <div class="addon">
-                <div>
-                  <div class="addon-name">Potatoes (2-pack)</div>
-                  <div class="addon-price">$1 per 2</div>
-                </div>
-                <div class="addon-qty">
-                  <button type="button" class="qty-btn sm" data-addon="potato" data-action="dec">−</button>
-                  <input type="number" min="0" max="50" value="0" name="addon_potato" data-addon="potato" />
-                  <button type="button" class="qty-btn sm" data-addon="potato" data-action="inc">+</button>
-                </div>
-              </div>
-              <div class="addon">
-                <div>
-                  <div class="addon-name">Sauce — Mild</div>
-                  <div class="addon-price">$10 / bottle</div>
-                </div>
-                <div class="addon-qty">
-                  <button type="button" class="qty-btn sm" data-addon="sauceMild" data-action="dec">−</button>
-                  <input type="number" min="0" max="20" value="0" name="addon_sauceMild" data-addon="sauceMild" />
-                  <button type="button" class="qty-btn sm" data-addon="sauceMild" data-action="inc">+</button>
-                </div>
-              </div>
-              <div class="addon">
-                <div>
-                  <div class="addon-name">Sauce — Spicy</div>
-                  <div class="addon-price">$10 / bottle</div>
-                </div>
-                <div class="addon-qty">
-                  <button type="button" class="qty-btn sm" data-addon="sauceSpicy" data-action="dec">−</button>
-                  <input type="number" min="0" max="20" value="0" name="addon_sauceSpicy" data-addon="sauceSpicy" />
-                  <button type="button" class="qty-btn sm" data-addon="sauceSpicy" data-action="inc">+</button>
-                </div>
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Your Info</legend>
-            <div class="row-2">
-              <label>
-                <span>Name</span>
-                <input type="text" name="customer_name" required autocomplete="name" placeholder="First &amp; last" />
-              </label>
-              <label>
-                <span>Phone</span>
-                <input type="tel" name="customer_phone" required autocomplete="tel" placeholder="(512) 555-0123" />
-              </label>
-            </div>
-            <label>
-              <span>Email <em>(optional)</em></span>
-              <input type="email" name="customer_email" autocomplete="email" placeholder="you@email.com" />
-            </label>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Pickup</legend>
-            <div class="row-2">
-              <label>
-                <span>Saturday</span>
-                <select name="pickup_date" id="pickup_date" required></select>
-              </label>
-              <label>
-                <span>Time</span>
-                <select name="pickup_time" id="pickup_time" required></select>
-              </label>
-            </div>
-            <label>
-              <span>Notes <em>(allergies, special asks, etc.)</em></span>
-              <textarea name="notes" rows="2" placeholder="Anything we should know?"></textarea>
-            </label>
-          </fieldset>
-
-        </div>
-
-        <!-- RIGHT: live summary -->
-        <aside class="form-right">
-          <div class="summary-card">
-            <div class="summary-title">Your Boil</div>
-            <ul id="summaryList" class="summary-list"></ul>
-            <div class="summary-row summary-subtotal">
-              <span>Subtotal</span>
-              <strong id="sumSubtotal">$0.00</strong>
-            </div>
-            <div class="summary-row summary-tax">
-              <span>Tax (estimated)</span>
-              <strong id="sumTax">$0.00</strong>
-            </div>
-            <div class="summary-row summary-total">
-              <span>Total</span>
-              <strong id="sumTotal">$0.00</strong>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
-              Place Order →
-            </button>
-            <div class="summary-foot">
-              You'll get a confirmation text + Zelle instructions after submitting.
-            </div>
-          </div>
-        </aside>
-      </div>
-    </form>
+    <div class="order-embed-wrap">
+      <iframe
+        id="orderFrame"
+        src="order.html"
+        title="Backyard Boil order form"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+      <p class="embed-fallback">
+        Trouble loading the form?
+        <a href="order.html" target="_blank" rel="noopener">Open it in a new tab →</a>
+      </p>
+    </div>
   </div>
 </section>
-
-<!-- ============ CONFIRMATION MODAL ============ -->
-<div id="confirmModal" class="modal" aria-hidden="true">
-  <div class="modal-backdrop"></div>
-  <div class="modal-card" role="dialog" aria-labelledby="confirmTitle">
-    <div class="modal-icon">✅</div>
-    <h2 id="confirmTitle">Order received!</h2>
-    <p>Order <strong id="orderRef">#—</strong> · We'll text you shortly to confirm.</p>
-
-    <div class="zelle-box">
-      <div class="zelle-label">Pay with Zelle</div>
-      <div class="zelle-amount">Send <strong id="zelleAmount">$0.00</strong></div>
-      <div class="zelle-target">
-        <span>to</span>
-        <code id="zelleHandle">— update Zelle handle in script.js —</code>
-        <button type="button" class="btn btn-ghost btn-sm" id="copyZelle">Copy</button>
-      </div>
-      <div class="zelle-memo">
-        Memo: <code id="zelleMemo">BOIL-—</code>
-      </div>
-    </div>
-
-    <p class="modal-note">
-      Save this page or screenshot it. We'll send pickup address Saturday morning.
-    </p>
-    <button type="button" class="btn btn-primary btn-block" id="closeModal">Got it</button>
-  </div>
-</div>
 
 <!-- ============ FAQ ============ -->
 <section id="faq" class="section section-light">
@@ -396,6 +208,18 @@
   </div>
 </footer>
 
-<script src="script.js"></script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Smooth-resize the iframe if order.html exposes a height via postMessage.
+  // Safe no-op if the embedded form doesn't send anything.
+  window.addEventListener('message', (e) => {
+    const f = document.getElementById('orderFrame');
+    if (!f || !e.data) return;
+    if (typeof e.data === 'object' && e.data.type === 'bb-order-height' && Number.isFinite(e.data.height)) {
+      f.style.height = e.data.height + 'px';
+    }
+  });
+</script>
 </body>
 </html>
